@@ -1,0 +1,2 @@
+npm start
+#nodemon app
