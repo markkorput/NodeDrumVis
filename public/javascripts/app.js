@@ -9,18 +9,22 @@
     }
 
     App.prototype.init = function() {
-      this.scene = this.createScene();
+      this.notes = new Backbone.Collection();
       this.initVfx();
+      this.initGui();
+      this.scene = this.createScene();
       this.clock = new THREE.Clock();
       this.controls = new THREE.TrackballControls(this.camera, this.renderer.domElement);
-      this.initGui();
       return $(window).on('keydown', this._keyDown).mousemove(this._mouseMove);
     };
 
     App.prototype.update = function() {
       var dt;
       dt = this.clock.getDelta();
-      this.controls.update(dt);
+      if (this.gui_values.trackballControls) {
+        this.controls.update(dt);
+      }
+      this.singleLine.update(dt);
       if (this.gui_values.paused) {
 
       }
@@ -32,7 +36,6 @@
 
     App.prototype.initVfx = function() {
       this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
-      this.camera.position.z = 500;
       this.renderer = new THREE.WebGLRenderer({
         preserveDrawingBuffer: true
       });
@@ -43,6 +46,12 @@
     App.prototype.createScene = function() {
       var scene;
       scene = new THREE.Scene();
+      this.singleLine = new SingleLine({
+        scene: scene,
+        camera: this.camera,
+        notes: this.notes,
+        settings: this.gui_values
+      });
       return scene;
     };
 
@@ -51,40 +60,47 @@
     };
 
     App.prototype._keyDown = function(e) {
-      console.log('keycode: ' + e.keyCode);
+      if (this.gui_values.logKeys) {
+        console.log('keycode: ' + e.keyCode, e);
+      }
+      if (this.gui_values.keysToNotes) {
+        this.notes.add({
+          note: e.keyCode
+        });
+      }
       if (e.keyCode === 32) {
         return this.gui_values.paused = !this.gui_values.paused;
       }
     };
 
     App.prototype.initGui = function() {
-      var folder, item;
+      var folder, item,
+        _this = this;
       this.gui = new dat.GUI();
       this.gui_values = new function() {
-        this.timer = 0;
-        this.delay = 2;
-        this.paused = false;
-        this.maxTargets = 10;
-        this.currentTarget = 1;
-        this.ghost = true;
-        return this.fakeData = false;
+        this.trackballControls = false;
+        this.logKeys = false;
+        this.keysToNotes = true;
+        return this.camSpeed = 0.1;
       };
-      folder = this.gui.addFolder('Timing');
-      item = folder.add(this.gui_values, 'timer', 0, 1);
-      item.listen();
-      item = folder.add(this.gui_values, 'delay', 0, 5);
-      item = folder.add(this.gui_values, 'paused');
-      item.listen();
+      folder = this.gui.addFolder('Params');
       folder.open();
-      folder = this.gui.addFolder('Targets');
-      item = folder.add(this.gui_values, 'maxTargets', 1, 30);
-      item = folder.add(this.gui_values, 'currentTarget', 1, 10);
-      item.listen();
-      item = folder.add(this.gui_values, 'ghost');
+      item = folder.add(this.gui_values, 'trackballControls');
+      item = folder.add(this.gui_values, 'logKeys');
+      item = folder.add(this.gui_values, 'keysToNotes');
+      folder.add({
+        Reset: function() {
+          return _this.reset();
+        }
+      }, 'Reset');
+      folder = this.gui.addFolder('SingeLine');
       folder.open();
-      folder = this.gui.addFolder('Debug');
-      item = folder.add(this.gui_values, 'fakeData');
-      return folder.open();
+      return item = folder.add(this.gui_values, 'camSpeed', -2, 2);
+    };
+
+    App.prototype.reset = function() {
+      this.notes.reset();
+      return this.camera.position.set(0, 0, 0);
     };
 
     return App;

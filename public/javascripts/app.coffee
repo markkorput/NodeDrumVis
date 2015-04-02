@@ -1,25 +1,30 @@
 class App
   init: ->
-    @scene = @createScene()
+    @notes = new Backbone.Collection()
     @initVfx()
+    @initGui()
+    @scene = @createScene()
 
     @clock = new THREE.Clock()
     @controls = new THREE.TrackballControls( @camera, @renderer.domElement )
-    @initGui()    
+        
     $(window).on('keydown', @_keyDown).mousemove(@_mouseMove)#.on('resize', @_resize)
 
   update: ->
     dt = @clock.getDelta()
-    @controls.update( dt );
+    if @gui_values.trackballControls
+      @controls.update( dt );
+    @singleLine.update(dt)
     return if @gui_values.paused
 
   draw: ->
     @renderer.render(@scene, @camera)
 
   initVfx: ->
-    # @camera = new THREE.OrthographicCamera(-1200, 1000, -1100, 1200, 10, 10000)
+    # @camera = new THREE.OrthographicCamera(-100, 100, -100, 100, 0, 1000)
     @camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000)
-    @camera.position.z = 500
+    # @camera.position.z = 500
+    # @camera.lookAt(new THREE.Vector3(0,0,-1))
     
     # @renderer = new THREE.CanvasRenderer()
     @renderer = new THREE.WebGLRenderer({preserveDrawingBuffer: true}) # preserveDrawingBuffer: true allows for image exports, but has some performance implications
@@ -29,13 +34,18 @@ class App
 
   createScene: ->
     scene = new THREE.Scene()
+    @singleLine = new SingleLine(scene: scene, camera: @camera, notes: @notes, settings: @gui_values)
     return scene
 
   _resize: ->
     console.log 'TODO; _resize'
 
   _keyDown: (e) =>
-    console.log 'keycode: ' + e.keyCode
+    if @gui_values.logKeys
+      console.log 'keycode: ' + e.keyCode, e
+
+    if(@gui_values.keysToNotes)
+      @notes.add(note: e.keyCode)
 
     if(e.keyCode == 32) # space
       @gui_values.paused = (!@gui_values.paused)      
@@ -55,35 +65,46 @@ class App
     @gui = new dat.GUI() # ({autoPlace:true});
 
     @gui_values = new ->
-      @timer = 0
-      @delay = 2
-      @paused = false
-      @maxTargets = 10
-      @currentTarget = 1
-      @ghost = true
-      @fakeData = false
+      @trackballControls = false
+      @logKeys = false
+      @keysToNotes = true
 
+      @camSpeed = 0.1
 
-    folder = @gui.addFolder 'Timing'
-    item = folder.add(@gui_values, 'timer', 0, 1)
-    item.listen()
-    item = folder.add(@gui_values, 'delay', 0, 5)
-    # item.onChange (val) => @recorder.autoRecordDelay = val
-    item = folder.add(@gui_values, 'paused')
-    item.listen()
+    folder = @gui.addFolder 'Params'
     folder.open()
-    folder = @gui.addFolder 'Targets'
-    item = folder.add(@gui_values, 'maxTargets', 1, 30)
-    # item.onChange (val) => @target_system.set('maxTargets')
-    item = folder.add(@gui_values, 'currentTarget', 1, 10)
-    item.listen()
-    item = folder.add(@gui_values, 'ghost')
+    item = folder.add(@gui_values, 'trackballControls')
+    item = folder.add(@gui_values, 'logKeys')
+    item = folder.add(@gui_values, 'keysToNotes')
+    folder.add({Reset: => @reset()}, 'Reset')
     # item.onChange (val) => @visualizer.set(ghost: val)
+
+    folder = @gui.addFolder 'SingeLine'
     folder.open()
-    folder = @gui.addFolder 'Debug'
-    item = folder.add(@gui_values, 'fakeData')
-    # item.onChange (val) => @myoManager.enableDummyData(val)
-    folder.open()
+    item = folder.add(@gui_values, 'camSpeed', -2, 2)
+
+    # item = folder.add(@gui_values, 'delay', 0, 5)
+    # # item.onChange (val) => @recorder.autoRecordDelay = val
+    # item = folder.add(@gui_values, 'paused')
+    # item.listen()
+
+    # folder = @gui.addFolder 'Targets'
+    # folder.open()
+    # item = folder.add(@gui_values, 'maxTargets', 1, 30)
+    # # item.onChange (val) => @target_system.set('maxTargets')
+    # item = folder.add(@gui_values, 'currentTarget', 1, 10)
+    # item.listen()
+    # item = folder.add(@gui_values, 'ghost')
+    # # item.onChange (val) => @visualizer.set(ghost: val)
+    # 
+    # folder = @gui.addFolder 'Debug'
+    # folder.open()
+    # # item = folder.add(@gui_values, 'fakeData')
+    # # # item.onChange (val) => @myoManager.enableDummyData(val)
+    
+  reset: ->
+    @notes.reset()
+    @camera.position.set(0,0,0)
 
 
 jQuery(document).ready ->
