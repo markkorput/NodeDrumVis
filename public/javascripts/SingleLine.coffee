@@ -17,10 +17,12 @@ class @SingleLine
 
     # gui controls
     if @options.gui
-      folder = @options.gui.addFolder 'SingeLine'
+      @options.gui.remember @config
+      folder = @options.gui.addFolder 'SingleLine'
       folder.open()
-      item = folder.add(@config, 'enabled')
-      item = folder.add(@config, 'camSpeed', -2, 2)
+      _.each Object.keys(@config), (key) =>
+        item = folder.add(@config, key)
+      
 
     # callbacks
     @notes.on 'add', (note) =>

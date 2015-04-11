@@ -72,6 +72,7 @@ class App
       @keysToNotes = true
       @running = true
 
+    @gui.remember(@gui_values)
     folder = @gui.addFolder 'Params'
     folder.open()
     item = folder.add(@gui_values, 'running')
