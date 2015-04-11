@@ -1,23 +1,30 @@
-class @SingleLine
+class @RandomShapes
   constructor: (_opts) ->
     @options = _opts
     @camera = _opts.camera
     @scene = _opts.scene
     @notes = _opts.notes
     @colors = _.map Please.make_color(colors_returned: 20), (clr) -> new THREE.Color(clr)
-    @geometry = new THREE.CubeGeometry(1, 1, 1)
-    @relativeSpawnPos = new THREE.Vector3(0, 0, -30)
     @kinds = []
-    @camVelocity = new THREE.Vector3(0, 0, 0.001)
+    @camVelocity = new THREE.Vector3(0, 0, 0)
+
+    # shapes
+    @geometries = [new THREE.CubeGeometry(1, 1, 1), new THREE.PlaneGeometry( 5, 20, 32 )]
 
     # configurables
     @config = new ->
       @enabled = true
       @camSpeed = 0.1
+      @spawnPosX = 100
+      @spawnPosY = 0
+      @spawnPosZ = -30
+      @targetPosX = 0
+      @targetPosY = 0
+      @targetPosZ = -30
 
     # gui controls
     if @options.gui
-      folder = @options.gui.addFolder 'SingeLine'
+      folder = @options.gui.addFolder 'RandomShapes'
       folder.open()
       item = folder.add(@config, 'enabled')
       item = folder.add(@config, 'camSpeed', -2, 2)
@@ -46,17 +53,27 @@ class @SingleLine
 
   add: (kind, volume) ->
     return if @config.enabled != true
-
     material = new THREE.LineBasicMaterial()
     idx = @kindToIndex(kind)
     material.color = @colors[idx]
-    mesh = new THREE.Mesh(@geometry, material)      
-    mesh.position.addVectors(@camera.position, @relativeSpawnPos)
-    mesh.position.y += idx*@geometry.height
+    mesh = new THREE.Mesh(@geometries[0], material)      
+    mesh.position.addVectors(@camera.position, new THREE.Vector3(@config.spawnPosX, @config.spawnPosY, @config.spawnPosZ))
     @scene.add mesh
+
+    endPos = new THREE.Vector3(0,0,0)
+    endPos.addVectors(@camera.position, new THREE.Vector3(@config.targetPosX, @config.targetPosY, @config.targetPosZ))
+
+    new TWEEN.Tween( mesh.position )
+      .to({x: endPos.x, y: endPos.y, z: endPos.z})
+      .easing( TWEEN.Easing.Exponential.Out )
+      .start()
+      .onComplete =>
+        console.log 'done'
+
     return mesh
 
   update: (dt) ->
     return if @config.enabled != true
-    @camVelocity.x = @config.camSpeed
+    TWEEN.update()
+    @camVelocity.z = @config.camSpeed
     @camera.position.add @camVelocity

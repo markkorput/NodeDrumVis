@@ -15,6 +15,7 @@ class App
     if @gui_values.trackballControls
       @controls.update( dt );
     @singleLine.update(dt)
+    @randomShapes.update(dt)
     return if @gui_values.paused
 
   draw: ->
@@ -34,7 +35,8 @@ class App
 
   createScene: ->
     scene = new THREE.Scene()
-    @singleLine = new SingleLine(scene: scene, camera: @camera, notes: @notes, settings: @gui_values)
+    @singleLine = new SingleLine(scene: scene, camera: @camera, notes: @notes, gui: @gui)
+    @randomShapes = new RandomShapes(scene: scene, camera: @camera, notes: @notes, gui: @gui)
     return scene
 
   _resize: ->
@@ -70,8 +72,6 @@ class App
       @keysToNotes = true
       @running = true
 
-      @camSpeed = 0.1
-
     folder = @gui.addFolder 'Params'
     folder.open()
     item = folder.add(@gui_values, 'running')
@@ -80,12 +80,6 @@ class App
     item = folder.add(@gui_values, 'keysToNotes')
     folder.add({Reset: => @reset()}, 'Reset')
     # item.onChange (val) => @visualizer.set(ghost: val)
-
-    folder = @gui.addFolder 'SingeLine'
-    folder.open()
-    item = folder.add(@gui_values, 'camSpeed', -2, 2)
-
-
     
   reset: ->
     @notes.reset()

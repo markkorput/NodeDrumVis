@@ -25,6 +25,7 @@
         this.controls.update(dt);
       }
       this.singleLine.update(dt);
+      this.randomShapes.update(dt);
       if (this.gui_values.paused) {
 
       }
@@ -50,7 +51,13 @@
         scene: scene,
         camera: this.camera,
         notes: this.notes,
-        settings: this.gui_values
+        gui: this.gui
+      });
+      this.randomShapes = new RandomShapes({
+        scene: scene,
+        camera: this.camera,
+        notes: this.notes,
+        gui: this.gui
       });
       return scene;
     };
@@ -81,8 +88,7 @@
         this.trackballControls = false;
         this.logKeys = false;
         this.keysToNotes = true;
-        this.running = true;
-        return this.camSpeed = 0.1;
+        return this.running = true;
       };
       folder = this.gui.addFolder('Params');
       folder.open();
@@ -90,14 +96,11 @@
       item = folder.add(this.gui_values, 'trackballControls');
       item = folder.add(this.gui_values, 'logKeys');
       item = folder.add(this.gui_values, 'keysToNotes');
-      folder.add({
+      return folder.add({
         Reset: function() {
           return _this.reset();
         }
       }, 'Reset');
-      folder = this.gui.addFolder('SingeLine');
-      folder.open();
-      return item = folder.add(this.gui_values, 'camSpeed', -2, 2);
     };
 
     App.prototype.reset = function() {
