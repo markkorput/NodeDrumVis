@@ -68,11 +68,13 @@ class App
       @trackballControls = false
       @logKeys = false
       @keysToNotes = true
+      @running = true
 
       @camSpeed = 0.1
 
     folder = @gui.addFolder 'Params'
     folder.open()
+    item = folder.add(@gui_values, 'running')
     item = folder.add(@gui_values, 'trackballControls')
     item = folder.add(@gui_values, 'logKeys')
     item = folder.add(@gui_values, 'keysToNotes')
@@ -83,24 +85,7 @@ class App
     folder.open()
     item = folder.add(@gui_values, 'camSpeed', -2, 2)
 
-    # item = folder.add(@gui_values, 'delay', 0, 5)
-    # # item.onChange (val) => @recorder.autoRecordDelay = val
-    # item = folder.add(@gui_values, 'paused')
-    # item.listen()
 
-    # folder = @gui.addFolder 'Targets'
-    # folder.open()
-    # item = folder.add(@gui_values, 'maxTargets', 1, 30)
-    # # item.onChange (val) => @target_system.set('maxTargets')
-    # item = folder.add(@gui_values, 'currentTarget', 1, 10)
-    # item.listen()
-    # item = folder.add(@gui_values, 'ghost')
-    # # item.onChange (val) => @visualizer.set(ghost: val)
-    # 
-    # folder = @gui.addFolder 'Debug'
-    # folder.open()
-    # # item = folder.add(@gui_values, 'fakeData')
-    # # # item.onChange (val) => @myoManager.enableDummyData(val)
     
   reset: ->
     @notes.reset()
@@ -110,8 +95,9 @@ class App
 jQuery(document).ready ->
   window.drawFrame = ->
     requestAnimationFrame(drawFrame)
-    app.update()
-    app.draw()
+    if app.gui_values.running
+      app.update()
+      app.draw()
 
   window.app = new App()
   window.app.init()

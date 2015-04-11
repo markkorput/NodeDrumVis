@@ -81,10 +81,12 @@
         this.trackballControls = false;
         this.logKeys = false;
         this.keysToNotes = true;
+        this.running = true;
         return this.camSpeed = 0.1;
       };
       folder = this.gui.addFolder('Params');
       folder.open();
+      item = folder.add(this.gui_values, 'running');
       item = folder.add(this.gui_values, 'trackballControls');
       item = folder.add(this.gui_values, 'logKeys');
       item = folder.add(this.gui_values, 'keysToNotes');
@@ -110,8 +112,10 @@
   jQuery(document).ready(function() {
     window.drawFrame = function() {
       requestAnimationFrame(drawFrame);
-      app.update();
-      return app.draw();
+      if (app.gui_values.running) {
+        app.update();
+        return app.draw();
+      }
     };
     window.app = new App();
     window.app.init();
