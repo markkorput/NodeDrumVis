@@ -8,7 +8,19 @@ this.Tiler = (function() {
     this.camera = _opts.camera;
     this.scene = _opts.scene;
     this._notes = _opts.notes;
+    this.colors = _.map(Please.make_color({
+      colors_returned: 20
+    }), function(clr) {
+      return new THREE.Color(clr);
+    });
+    this.materials = _.map(this.colors, function(clr) {
+      var material;
+      material = new THREE.LineBasicMaterial();
+      material.color = clr;
+      return material;
+    });
     this.kinds = [];
+    this.gridSize = _opts.gridSize;
     if (_opts.imageUrl) {
       this.setImageUrl(_opts.imageUrl);
     }
@@ -33,13 +45,13 @@ this.Tiler = (function() {
     });
     this._notes.on('remove', function(note) {
       _this.log('removing note...');
-      return _this.scene.remove(note.get('randomShapeMesh'));
+      return _this.scene.remove(note.get('tilerMesh'));
     });
     this._notes.on('reset', function(collection, options) {
       _this.log('resetting...');
       _.each(options.previousModels, function(note) {
-        _this.scene.remove(note.get('randomShapeMesh'));
-        return note.unset('mesh');
+        _this.scene.remove(note.get('tilerMesh'));
+        return note.unset('tilerMesh');
       });
       return _this.kinds = [];
     });
@@ -56,14 +68,21 @@ this.Tiler = (function() {
   };
 
   Tiler.prototype.add = function(kind, volume) {
-    var idx, material, mesh;
+    var mesh;
     if (this.config.enabled !== true) {
       return;
     }
-    material = new THREE.LineBasicMaterial();
-    idx = this.kindToIndex(kind);
-    material.color = this.colors[idx];
-    mesh = new THREE.Mesh(_.sample(this.geometries), material);
+    mesh = new THREE.Mesh(this._cellGeometry, this.materials[this.kindToIndex(kind)]);
+    mesh.position.set(this._cellOrigin.x + this.cursor.x * this.cellSize.x, this._cellOrigin.y - this.cursor.y * this.cellSize.y, this._cellOrigin.z + this.cursor.z);
+    this.cursor.x = this.cursor.x + 1;
+    if (this.cursor.x >= this.gridSize.x) {
+      this.cursor.x = 0;
+      this.cursor.y = this.cursor.y + 1;
+      if (this.cursor.y >= this.gridSize.y) {
+        this.cursor.y = 0;
+        this.cursor.z = this.cursor.z + 0.001;
+      }
+    }
     this.scene.add(mesh);
     return mesh;
   };
@@ -116,10 +135,28 @@ this.Tiler = (function() {
     });
     this._imageGeometry = new THREE.PlaneGeometry(this._imageTexture.image.width / this._imageTexture.image.height, 1);
     this._imageMesh = new THREE.Mesh(this._imageGeometry, this._imageMaterial);
-    this._imageMesh.position.set(0, 0, -1);
+    this._imageMesh.position.copy(this.camera.position);
+    this._imageMesh.position.z = this._imageMesh.position.z - 1.05;
     if (this.config.showOriginal) {
-      return this.scene.add(this._imageMesh);
+      this.scene.add(this._imageMesh);
     }
+    this.gridSize || (this.gridSize = new THREE.Vector2(10, 10));
+    this.cellSize = new THREE.Vector2(this._imageGeometry.width / this.gridSize.x, this._imageGeometry.height / this.gridSize.y);
+    this._cellGeometry = new THREE.PlaneGeometry(this.cellSize.x, this.cellSize.y);
+    this._cellOrigin = new THREE.Vector3(this._imageMesh.position.x - this._imageGeometry.width / 2 + this.cellSize.x / 2, this._imageMesh.position.y + this._imageGeometry.height / 2 - this.cellSize.y / 2, this._imageMesh.position.z + 0.001);
+    this.removeTiles();
+    return this.cursor = new THREE.Vector3(0, 0, 0);
+  };
+
+  Tiler.prototype.removeTiles = function() {
+    var _this = this;
+    return this._notes.each(function(note) {
+      var m;
+      if (m = note.get('tilerMesh')) {
+        _this.scene.remove(m);
+        return note.unset('tilerMesh');
+      }
+    });
   };
 
   return Tiler;

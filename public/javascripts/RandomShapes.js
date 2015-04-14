@@ -52,7 +52,7 @@ this.RandomShapes = (function() {
       _this.log('resetting...');
       _.each(options.previousModels, function(note) {
         _this.scene.remove(note.get('randomShapeMesh'));
-        return note.unset('mesh');
+        return note.unset('randomeShapeMesh');
       });
       return _this.kinds = [];
     });

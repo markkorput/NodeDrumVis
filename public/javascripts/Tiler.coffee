@@ -5,8 +5,13 @@ class @Tiler
     @camera = _opts.camera
     @scene = _opts.scene
     @_notes = _opts.notes
-    # @colors = _.map Please.make_color(colors_returned: 20), (clr) -> new THREE.Color(clr)
+    @colors = _.map Please.make_color(colors_returned: 20), (clr) -> new THREE.Color(clr)
+    @materials = _.map @colors, (clr) -> 
+      material = new THREE.LineBasicMaterial()
+      material.color = clr
+      material
     @kinds = []
+    @gridSize = _opts.gridSize
     @setImageUrl(_opts.imageUrl) if _opts.imageUrl
 
     # configurables
@@ -29,13 +34,13 @@ class @Tiler
 
     @_notes.on 'remove', (note) =>
       @log 'removing note...'
-      @scene.remove(note.get('randomShapeMesh'))
+      @scene.remove(note.get('tilerMesh'))
 
     @_notes.on 'reset', (collection, options) =>
       @log 'resetting...'
       _.each options.previousModels, (note) =>
-        @scene.remove note.get('randomShapeMesh')
-        note.unset('mesh')
+        @scene.remove note.get('tilerMesh')
+        note.unset('tilerMesh')
       @kinds = []
 
   kindToIndex: (kind) ->
@@ -47,12 +52,23 @@ class @Tiler
 
   add: (kind, volume) ->
     return if @config.enabled != true
-    material = new THREE.LineBasicMaterial()
-    idx = @kindToIndex(kind)
-    material.color = @colors[idx]
-    mesh = new THREE.Mesh(_.sample(@geometries), material)      
+
+    mesh = new THREE.Mesh(@_cellGeometry, @materials[@kindToIndex(kind)])
+    mesh.position.set(
+      @_cellOrigin.x + @cursor.x * @cellSize.x,
+      @_cellOrigin.y - @cursor.y * @cellSize.y,
+      @_cellOrigin.z + @cursor.z)
+
+    # increase cursor
+    @cursor.x = @cursor.x + 1
+    if @cursor.x >= @gridSize.x
+      @cursor.x = 0
+      @cursor.y = @cursor.y + 1
+      if @cursor.y >= @gridSize.y
+        @cursor.y = 0
+        @cursor.z = @cursor.z + 0.001
+
     @scene.add mesh
-    
     return mesh
 
   update: (dt) ->
@@ -92,5 +108,25 @@ class @Tiler
     @_imageMaterial = new THREE.MeshBasicMaterial(map: @_imageTexture)
     @_imageGeometry = new THREE.PlaneGeometry(@_imageTexture.image.width / @_imageTexture.image.height,1)
     @_imageMesh = new THREE.Mesh(@_imageGeometry, @_imageMaterial)
-    @_imageMesh.position.set(0,0,-1)
+    @_imageMesh.position.copy(@camera.position)
+    @_imageMesh.position.z = @_imageMesh.position.z-1.05 # place _before_ camera
     @scene.add @_imageMesh if @config.showOriginal
+    @gridSize ||= new THREE.Vector2(10,10)
+    @cellSize = new THREE.Vector2(@_imageGeometry.width / @gridSize.x, @_imageGeometry.height / @gridSize.y)
+    @_cellGeometry = new THREE.PlaneGeometry(@cellSize.x, @cellSize.y)
+    @_cellOrigin = new THREE.Vector3(
+      @_imageMesh.position.x - @_imageGeometry.width /2 + @cellSize.x/2,
+      @_imageMesh.position.y + @_imageGeometry.height/2 - @cellSize.y/2,
+      @_imageMesh.position.z+0.001)
+
+    @removeTiles()
+    @cursor = new THREE.Vector3(0,0,0)
+
+  removeTiles: () ->
+    @_notes.each (note) =>
+      if m = note.get('tilerMesh')
+        @scene.remove m
+        note.unset('tilerMesh')
+
+
+

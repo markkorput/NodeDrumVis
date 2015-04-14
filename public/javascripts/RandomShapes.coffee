@@ -46,7 +46,7 @@ class @RandomShapes
       @log 'resetting...'
       _.each options.previousModels, (note) =>
         @scene.remove note.get('randomShapeMesh')
-        note.unset('mesh')
+        note.unset('randomeShapeMesh')
       @kinds = []
 
   kindToIndex: (kind) ->
