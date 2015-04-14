@@ -30,7 +30,6 @@ class @RandomShapes
     if @options.gui
       @options.gui.remember(@config)
       folder = @options.gui.addFolder 'RandomShapes'
-      folder.open()
       _.each Object.keys(@config), (key) =>
         item = folder.add(@config, key)
 
@@ -62,7 +61,7 @@ class @RandomShapes
     material = new THREE.LineBasicMaterial()
     idx = @kindToIndex(kind)
     material.color = @colors[idx]
-    mesh = new THREE.Mesh(_.sample(@geometries), material)      
+    mesh = new THREE.Mesh(_.sample(@geometries), material)
     @scene.add mesh
     
     #
@@ -117,7 +116,6 @@ class @RandomShapes
 
   update: (dt) ->
     return if @config.enabled != true
-    TWEEN.update()
     @camVelocity.z = @config.camSpeed
     @camera.position.add @camVelocity
 

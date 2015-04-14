@@ -12,10 +12,12 @@ class App
 
   update: ->
     dt = @clock.getDelta()
+    TWEEN.update()
     if @gui_values.trackballControls
       @controls.update( dt );
     @singleLine.update(dt)
     @randomShapes.update(dt)
+    @tiler.update(dt)
     return if @gui_values.paused
 
   draw: ->
@@ -37,6 +39,7 @@ class App
     scene = new THREE.Scene()
     @singleLine = new SingleLine(scene: scene, camera: @camera, notes: @notes, gui: @gui)
     @randomShapes = new RandomShapes(scene: scene, camera: @camera, notes: @notes, gui: @gui)
+    @tiler = new Tiler(scene: scene, camera: @camera, notes: @notes, gui: @gui, imageUrl: 'images/elephant.jpg')
     return scene
 
   _resize: ->
@@ -74,7 +77,7 @@ class App
 
     @gui.remember(@gui_values)
     folder = @gui.addFolder 'Params'
-    folder.open()
+    # folder.open()
     item = folder.add(@gui_values, 'running')
     item = folder.add(@gui_values, 'trackballControls')
     item = folder.add(@gui_values, 'logKeys')

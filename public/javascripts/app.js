@@ -20,11 +20,13 @@ App = (function() {
   App.prototype.update = function() {
     var dt;
     dt = this.clock.getDelta();
+    TWEEN.update();
     if (this.gui_values.trackballControls) {
       this.controls.update(dt);
     }
     this.singleLine.update(dt);
     this.randomShapes.update(dt);
+    this.tiler.update(dt);
     if (this.gui_values.paused) {
 
     }
@@ -57,6 +59,13 @@ App = (function() {
       camera: this.camera,
       notes: this.notes,
       gui: this.gui
+    });
+    this.tiler = new Tiler({
+      scene: scene,
+      camera: this.camera,
+      notes: this.notes,
+      gui: this.gui,
+      imageUrl: 'images/elephant.jpg'
     });
     return scene;
   };
@@ -91,7 +100,6 @@ App = (function() {
     };
     this.gui.remember(this.gui_values);
     folder = this.gui.addFolder('Params');
-    folder.open();
     item = folder.add(this.gui_values, 'running');
     item = folder.add(this.gui_values, 'trackballControls');
     item = folder.add(this.gui_values, 'logKeys');

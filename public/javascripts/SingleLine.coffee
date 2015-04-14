@@ -19,7 +19,6 @@ class @SingleLine
     if @options.gui
       @options.gui.remember @config
       folder = @options.gui.addFolder 'SingleLine'
-      folder.open()
       _.each Object.keys(@config), (key) =>
         item = folder.add(@config, key)
       

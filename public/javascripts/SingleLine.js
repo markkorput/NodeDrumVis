@@ -23,7 +23,6 @@ this.SingleLine = (function() {
     if (this.options.gui) {
       this.options.gui.remember(this.config);
       folder = this.options.gui.addFolder('SingleLine');
-      folder.open();
       _.each(Object.keys(this.config), function(key) {
         var item;
         return item = folder.add(_this.config, key);

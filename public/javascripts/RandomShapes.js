@@ -32,7 +32,6 @@ this.RandomShapes = (function() {
     if (this.options.gui) {
       this.options.gui.remember(this.config);
       folder = this.options.gui.addFolder('RandomShapes');
-      folder.open();
       _.each(Object.keys(this.config), function(key) {
         var item;
         return item = folder.add(_this.config, key);
@@ -113,7 +112,6 @@ this.RandomShapes = (function() {
     if (this.config.enabled !== true) {
       return;
     }
-    TWEEN.update();
     this.camVelocity.z = this.config.camSpeed;
     return this.camera.position.add(this.camVelocity);
   };
