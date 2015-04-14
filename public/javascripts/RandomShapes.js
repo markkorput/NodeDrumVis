@@ -41,16 +41,19 @@ this.RandomShapes = (function() {
     this.notes.on('add', function(note) {
       var mesh;
       mesh = _this.add(note.get('note'), 1.0);
-      return note.mesh = mesh;
+      return note.set({
+        randomShapeMesh: mesh
+      });
     });
     this.notes.on('remove', function(note) {
-      console.log('removing note...');
-      return _this.scene.remove(note.mesh);
+      _this.log('removing note...');
+      return _this.scene.remove(note.get('randomShapeMesh'));
     });
     this.notes.on('reset', function(collection, options) {
-      console.log('resetting...');
+      _this.log('resetting...');
       _.each(options.previousModels, function(note) {
-        return _this.scene.remove(note.mesh);
+        _this.scene.remove(note.get('randomShapeMesh'));
+        return note.unset('mesh');
       });
       return _this.kinds = [];
     });
@@ -113,6 +116,10 @@ this.RandomShapes = (function() {
     TWEEN.update();
     this.camVelocity.z = this.config.camSpeed;
     return this.camera.position.add(this.camVelocity);
+  };
+
+  RandomShapes.prototype.log = function(msg) {
+    return console.log('RandomShapes', msg);
   };
 
   return RandomShapes;

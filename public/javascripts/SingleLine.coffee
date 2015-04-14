@@ -27,16 +27,17 @@ class @SingleLine
     # callbacks
     @notes.on 'add', (note) =>
       mesh = @add(note.get('note'), 1.0)
-      note.mesh = mesh
+      note.set({singleLineMesh: mesh})
 
     @notes.on 'remove', (note) =>
-      console.log 'removing note...'
-      @scene.remove(note.mesh)
+      @log 'removing note...'
+      @scene.remove(note.get('singleLineMesh'))
 
     @notes.on 'reset', (collection, options) =>
-      console.log 'resetting...'
+      @log 'resetting...'
       _.each options.previousModels, (note) =>
-        @scene.remove note.mesh
+        @scene.remove note.get('singleLineMesh')
+        note.unset('singleLineMesh')
       @kinds = []
 
   kindToIndex: (kind) ->
@@ -62,3 +63,7 @@ class @SingleLine
     return if @config.enabled != true
     @camVelocity.x = @config.camSpeed
     @camera.position.add @camVelocity
+
+  log: (msg) ->
+    console.log('SingleLine', msg)
+

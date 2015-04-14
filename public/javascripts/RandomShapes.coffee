@@ -37,16 +37,17 @@ class @RandomShapes
     # callbacks
     @notes.on 'add', (note) =>
       mesh = @add(note.get('note'), 1.0)
-      note.mesh = mesh
+      note.set({randomShapeMesh: mesh})
 
     @notes.on 'remove', (note) =>
-      console.log 'removing note...'
-      @scene.remove(note.mesh)
+      @log 'removing note...'
+      @scene.remove(note.get('randomShapeMesh'))
 
     @notes.on 'reset', (collection, options) =>
-      console.log 'resetting...'
+      @log 'resetting...'
       _.each options.previousModels, (note) =>
-        @scene.remove note.mesh
+        @scene.remove note.get('randomShapeMesh')
+        note.unset('mesh')
       @kinds = []
 
   kindToIndex: (kind) ->
@@ -119,3 +120,6 @@ class @RandomShapes
     TWEEN.update()
     @camVelocity.z = @config.camSpeed
     @camera.position.add @camVelocity
+
+  log: (msg) ->
+    console.log('RandomShapes', msg)

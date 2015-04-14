@@ -32,16 +32,19 @@ this.SingleLine = (function() {
     this.notes.on('add', function(note) {
       var mesh;
       mesh = _this.add(note.get('note'), 1.0);
-      return note.mesh = mesh;
+      return note.set({
+        singleLineMesh: mesh
+      });
     });
     this.notes.on('remove', function(note) {
-      console.log('removing note...');
-      return _this.scene.remove(note.mesh);
+      _this.log('removing note...');
+      return _this.scene.remove(note.get('singleLineMesh'));
     });
     this.notes.on('reset', function(collection, options) {
-      console.log('resetting...');
+      _this.log('resetting...');
       _.each(options.previousModels, function(note) {
-        return _this.scene.remove(note.mesh);
+        _this.scene.remove(note.get('singleLineMesh'));
+        return note.unset('singleLineMesh');
       });
       return _this.kinds = [];
     });
@@ -78,6 +81,10 @@ this.SingleLine = (function() {
     }
     this.camVelocity.x = this.config.camSpeed;
     return this.camera.position.add(this.camVelocity);
+  };
+
+  SingleLine.prototype.log = function(msg) {
+    return console.log('SingleLine', msg);
   };
 
   return SingleLine;
