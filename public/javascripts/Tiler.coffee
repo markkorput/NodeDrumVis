@@ -7,7 +7,7 @@ class @Tiler
     @_notes = _opts.notes
     @colors = _.map Please.make_color(colors_returned: 20), (clr) -> new THREE.Color(clr)
     @materials = _.map @colors, (clr) -> 
-      material = new THREE.LineBasicMaterial()
+      material = new THREE.MeshBasicMaterial() # new THREE.LineBasicMaterial()
       material.color = clr
       material
     @kinds = []
@@ -53,7 +53,14 @@ class @Tiler
   add: (kind, volume) ->
     return if @config.enabled != true
 
-    mesh = new THREE.Mesh(@_cellGeometry, @materials[@kindToIndex(kind)])
+    tex = @_imageTexture.clone()
+    tex.needsUpdate = true # not set by clone, but very much necessary to load the actual image
+    material = @materials[@kindToIndex(kind)] # new THREE.MeshBasicMaterial(map: tex)
+    material.map = tex
+    geom = @_cellGeometry #new THREE.PlaneGeometry(tex.image.width / tex.image.height, 1)
+    # material.map = tex
+    
+    mesh = new THREE.Mesh(geom, material)
     mesh.position.set(
       @_cellOrigin.x + @cursor.x * @cellSize.x,
       @_cellOrigin.y - @cursor.y * @cellSize.y,
@@ -92,19 +99,20 @@ class @Tiler
   setImageUrl: (_url) ->
     @log 'setImageUrl: ', _url
     @_imageUrl = _url
-    @textureLoader ||= new THREE.TextureLoader();
+    @loader ||= new THREE.TextureLoader();
+    # @loader = new THREE.ImageLoader();
 
-    onSuccess = (texture) => @setImageTexture texture
+    onSuccess = (tex) => @setImage tex
 
     onProgress = (xhr) => @log((xhr.loaded / xhr.total * 100) + '% loaded')
 
-    onError = (xhr) => @log( 'An error happened while loading texture' )
+    onError = (xhr) => @log( 'An error happened while loading image' )
 
-    @textureLoader.load @_imageUrl, onSuccess, onProgress, onError
+    @loader.load @_imageUrl, onSuccess, onProgress, onError
     
-  setImageTexture: (_texture) ->
-    @log 'setImageTexture: ', _texture
-    @_imageTexture = _texture
+  setImage: (_tex) ->
+    @log 'setImage: ', _tex
+    @_imageTexture = _tex
     @_imageMaterial = new THREE.MeshBasicMaterial(map: @_imageTexture)
     @_imageGeometry = new THREE.PlaneGeometry(@_imageTexture.image.width / @_imageTexture.image.height,1)
     @_imageMesh = new THREE.Mesh(@_imageGeometry, @_imageMaterial)

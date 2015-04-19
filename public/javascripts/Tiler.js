@@ -15,7 +15,7 @@ this.Tiler = (function() {
     });
     this.materials = _.map(this.colors, function(clr) {
       var material;
-      material = new THREE.LineBasicMaterial();
+      material = new THREE.MeshBasicMaterial();
       material.color = clr;
       return material;
     });
@@ -68,11 +68,16 @@ this.Tiler = (function() {
   };
 
   Tiler.prototype.add = function(kind, volume) {
-    var mesh;
+    var geom, material, mesh, tex;
     if (this.config.enabled !== true) {
       return;
     }
-    mesh = new THREE.Mesh(this._cellGeometry, this.materials[this.kindToIndex(kind)]);
+    tex = this._imageTexture.clone();
+    tex.needsUpdate = true;
+    material = this.materials[this.kindToIndex(kind)];
+    material.map = tex;
+    geom = this._cellGeometry;
+    mesh = new THREE.Mesh(geom, material);
     mesh.position.set(this._cellOrigin.x + this.cursor.x * this.cellSize.x, this._cellOrigin.y - this.cursor.y * this.cellSize.y, this._cellOrigin.z + this.cursor.z);
     this.cursor.x = this.cursor.x + 1;
     if (this.cursor.x >= this.gridSize.x) {
@@ -114,22 +119,22 @@ this.Tiler = (function() {
       _this = this;
     this.log('setImageUrl: ', _url);
     this._imageUrl = _url;
-    this.textureLoader || (this.textureLoader = new THREE.TextureLoader());
-    onSuccess = function(texture) {
-      return _this.setImageTexture(texture);
+    this.loader || (this.loader = new THREE.TextureLoader());
+    onSuccess = function(tex) {
+      return _this.setImage(tex);
     };
     onProgress = function(xhr) {
       return _this.log((xhr.loaded / xhr.total * 100) + '% loaded');
     };
     onError = function(xhr) {
-      return _this.log('An error happened while loading texture');
+      return _this.log('An error happened while loading image');
     };
-    return this.textureLoader.load(this._imageUrl, onSuccess, onProgress, onError);
+    return this.loader.load(this._imageUrl, onSuccess, onProgress, onError);
   };
 
-  Tiler.prototype.setImageTexture = function(_texture) {
-    this.log('setImageTexture: ', _texture);
-    this._imageTexture = _texture;
+  Tiler.prototype.setImage = function(_tex) {
+    this.log('setImage: ', _tex);
+    this._imageTexture = _tex;
     this._imageMaterial = new THREE.MeshBasicMaterial({
       map: this._imageTexture
     });
