@@ -37,6 +37,18 @@ this.Tiler = (function() {
         var item;
         return item = folder.add(_this.config, key);
       });
+      _.find(folder.__controllers, function(cont) {
+        return cont.property === 'showOriginal';
+      }).onChange(function(showOrig) {
+        if (!_this._imageMesh) {
+          return;
+        }
+        if (showOrig) {
+          return _this.scene.add(_this._imageMesh);
+        } else {
+          return _this.scene.remove(_this._imageMesh);
+        }
+      });
     }
     this._notes.on('add', function(note) {
       var mesh;

@@ -31,6 +31,14 @@ class @Tiler
       _.each Object.keys(@config), (key) =>
         item = folder.add(@config, key)
 
+      # add callback to specific controllers
+      _.find(folder.__controllers, (cont) -> cont.property == 'showOriginal').onChange (showOrig) =>
+        return if !@_imageMesh
+        if showOrig
+          @scene.add @_imageMesh
+        else
+          @scene.remove @_imageMesh
+
     # callbacks
     @_notes.on 'add', (note) =>
       mesh = @add(note.get('note'), 1.0)
