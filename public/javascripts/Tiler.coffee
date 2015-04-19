@@ -42,6 +42,7 @@ class @Tiler
         @scene.remove note.get('tilerMesh')
         note.unset('tilerMesh')
       @kinds = []
+      @cursor.set(0,0,0)
 
   kindToIndex: (kind) ->
     idx = _.indexOf(@kinds, kind)
@@ -55,16 +56,20 @@ class @Tiler
 
     tex = @_imageTexture.clone()
     tex.needsUpdate = true # not set by clone, but very much necessary to load the actual image
-    material = @materials[@kindToIndex(kind)] # new THREE.MeshBasicMaterial(map: tex)
-    material.map = tex
-    geom = @_cellGeometry #new THREE.PlaneGeometry(tex.image.width / tex.image.height, 1)
-    # material.map = tex
-    
-    mesh = new THREE.Mesh(geom, material)
+    material = new THREE.MeshBasicMaterial(map: tex, color: @colors[@kindToIndex(kind)]) # @materials[@kindToIndex(kind)]
+
+    # create and position mesh
+    mesh = new THREE.Mesh(@_cellGeometry, material)
     mesh.position.set(
       @_cellOrigin.x + @cursor.x * @cellSize.x,
       @_cellOrigin.y - @cursor.y * @cellSize.y,
       @_cellOrigin.z + @cursor.z)
+
+    # calculate tex coordinates
+    tex.repeat.x = 1.0 / @gridSize.x
+    tex.repeat.y = 1.0 / @gridSize.y
+    tex.offset.x = 1.0 / @gridSize.x * @cursor.x
+    tex.offset.y = 1.0 / @gridSize.y * (@gridSize.y-@cursor.y-1)
 
     # increase cursor
     @cursor.x = @cursor.x + 1
@@ -109,7 +114,7 @@ class @Tiler
     onError = (xhr) => @log( 'An error happened while loading image' )
 
     @loader.load @_imageUrl, onSuccess, onProgress, onError
-    
+
   setImage: (_tex) ->
     @log 'setImage: ', _tex
     @_imageTexture = _tex

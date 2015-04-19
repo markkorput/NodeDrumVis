@@ -53,7 +53,8 @@ this.Tiler = (function() {
         _this.scene.remove(note.get('tilerMesh'));
         return note.unset('tilerMesh');
       });
-      return _this.kinds = [];
+      _this.kinds = [];
+      return _this.cursor.set(0, 0, 0);
     });
   }
 
@@ -68,17 +69,22 @@ this.Tiler = (function() {
   };
 
   Tiler.prototype.add = function(kind, volume) {
-    var geom, material, mesh, tex;
+    var material, mesh, tex;
     if (this.config.enabled !== true) {
       return;
     }
     tex = this._imageTexture.clone();
     tex.needsUpdate = true;
-    material = this.materials[this.kindToIndex(kind)];
-    material.map = tex;
-    geom = this._cellGeometry;
-    mesh = new THREE.Mesh(geom, material);
+    material = new THREE.MeshBasicMaterial({
+      map: tex,
+      color: this.colors[this.kindToIndex(kind)]
+    });
+    mesh = new THREE.Mesh(this._cellGeometry, material);
     mesh.position.set(this._cellOrigin.x + this.cursor.x * this.cellSize.x, this._cellOrigin.y - this.cursor.y * this.cellSize.y, this._cellOrigin.z + this.cursor.z);
+    tex.repeat.x = 1.0 / this.gridSize.x;
+    tex.repeat.y = 1.0 / this.gridSize.y;
+    tex.offset.x = 1.0 / this.gridSize.x * this.cursor.x;
+    tex.offset.y = 1.0 / this.gridSize.y * (this.gridSize.y - this.cursor.y - 1);
     this.cursor.x = this.cursor.x + 1;
     if (this.cursor.x >= this.gridSize.x) {
       this.cursor.x = 0;
