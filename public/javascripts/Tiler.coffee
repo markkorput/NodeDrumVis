@@ -14,6 +14,7 @@ class @Tiler
     @config =
       enabled: true
       showOriginal: true
+      spacing: 0.0
       colorize: false
       offset: 0.0
       scale: 0.0
@@ -70,8 +71,8 @@ class @Tiler
     # create and position mesh
     mesh = new THREE.Mesh(@_cellGeometry, material)
     mesh.position.set(
-      @_cellOrigin.x + @cursor.x * @cellSize.x,
-      @_cellOrigin.y - @cursor.y * @cellSize.y,
+      @_cellOrigin.x + @cursor.x * @cellSize.x + @config.spacing * (@cursor.x - @gridSize.x/2),
+      @_cellOrigin.y - @cursor.y * @cellSize.y - @config.spacing * (@cursor.y - @gridSize.y/2),
       @_cellOrigin.z + @cursor.z)
 
     if @config.offset > 0.0
