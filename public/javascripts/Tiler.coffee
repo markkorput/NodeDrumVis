@@ -18,6 +18,9 @@ class @Tiler
     @config =
       enabled: true
       showOriginal: true
+      colorize: false
+      offset: 0.0
+      scale: 0.0
 
     # gui controls
     if @options.gui
@@ -56,7 +59,8 @@ class @Tiler
 
     tex = @_imageTexture.clone()
     tex.needsUpdate = true # not set by clone, but very much necessary to load the actual image
-    material = new THREE.MeshBasicMaterial(map: tex, color: @colors[@kindToIndex(kind)]) # @materials[@kindToIndex(kind)]
+    material = new THREE.MeshBasicMaterial(map: tex) # @materials[@kindToIndex(kind)]
+    material.color = @colors[@kindToIndex(kind)] if @config.colorize
 
     # create and position mesh
     mesh = new THREE.Mesh(@_cellGeometry, material)
@@ -64,6 +68,16 @@ class @Tiler
       @_cellOrigin.x + @cursor.x * @cellSize.x,
       @_cellOrigin.y - @cursor.y * @cellSize.y,
       @_cellOrigin.z + @cursor.z)
+
+    if @config.offset > 0.0
+      offsetter = new THREE.Vector3(@config.offset, 0, 0)
+      offsetter.applyAxisAngle(new THREE.Vector3(0,0,1), Math.random()*Math.PI*2)
+      mesh.position.add(offsetter)
+
+    # scaling
+    if @config.scale != 0.0
+      sc = 1.0 + Math.random()*@config.scale
+      mesh.scale.set(sc, sc, 1.0)
 
     # calculate tex coordinates
     tex.repeat.x = 1.0 / @gridSize.x

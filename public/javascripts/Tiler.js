@@ -26,7 +26,10 @@ this.Tiler = (function() {
     }
     this.config = {
       enabled: true,
-      showOriginal: true
+      showOriginal: true,
+      colorize: false,
+      offset: 0.0,
+      scale: 0.0
     };
     if (this.options.gui) {
       this.options.gui.remember(this.config);
@@ -69,18 +72,29 @@ this.Tiler = (function() {
   };
 
   Tiler.prototype.add = function(kind, volume) {
-    var material, mesh, tex;
+    var material, mesh, offsetter, sc, tex;
     if (this.config.enabled !== true) {
       return;
     }
     tex = this._imageTexture.clone();
     tex.needsUpdate = true;
     material = new THREE.MeshBasicMaterial({
-      map: tex,
-      color: this.colors[this.kindToIndex(kind)]
+      map: tex
     });
+    if (this.config.colorize) {
+      material.color = this.colors[this.kindToIndex(kind)];
+    }
     mesh = new THREE.Mesh(this._cellGeometry, material);
     mesh.position.set(this._cellOrigin.x + this.cursor.x * this.cellSize.x, this._cellOrigin.y - this.cursor.y * this.cellSize.y, this._cellOrigin.z + this.cursor.z);
+    if (this.config.offset > 0.0) {
+      offsetter = new THREE.Vector3(this.config.offset, 0, 0);
+      offsetter.applyAxisAngle(new THREE.Vector3(0, 0, 1), Math.random() * Math.PI * 2);
+      mesh.position.add(offsetter);
+    }
+    if (this.config.scale !== 0.0) {
+      sc = 1.0 + Math.random() * this.config.scale;
+      mesh.scale.set(sc, sc, 1.0);
+    }
     tex.repeat.x = 1.0 / this.gridSize.x;
     tex.repeat.y = 1.0 / this.gridSize.y;
     tex.offset.x = 1.0 / this.gridSize.x * this.cursor.x;
