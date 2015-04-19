@@ -13,12 +13,6 @@ this.Tiler = (function() {
     }), function(clr) {
       return new THREE.Color(clr);
     });
-    this.materials = _.map(this.colors, function(clr) {
-      var material;
-      material = new THREE.MeshBasicMaterial();
-      material.color = clr;
-      return material;
-    });
     this.kinds = [];
     this.gridSize = _opts.gridSize;
     if (_opts.imageUrl) {
@@ -29,7 +23,11 @@ this.Tiler = (function() {
       showOriginal: true,
       colorize: false,
       offset: 0.0,
-      scale: 0.0
+      scale: 0.0,
+      opacity: 1.0,
+      rotX: 0.0,
+      rotY: 0.0,
+      rotZ: 0.0
     };
     if (this.options.gui) {
       this.options.gui.remember(this.config);
@@ -84,6 +82,10 @@ this.Tiler = (function() {
     if (this.config.colorize) {
       material.color = this.colors[this.kindToIndex(kind)];
     }
+    if (this.config.opacity !== 1.0) {
+      material.transparent = true;
+      material.opacity = this.config.opacity;
+    }
     mesh = new THREE.Mesh(this._cellGeometry, material);
     mesh.position.set(this._cellOrigin.x + this.cursor.x * this.cellSize.x, this._cellOrigin.y - this.cursor.y * this.cellSize.y, this._cellOrigin.z + this.cursor.z);
     if (this.config.offset > 0.0) {
@@ -99,6 +101,7 @@ this.Tiler = (function() {
     tex.repeat.y = 1.0 / this.gridSize.y;
     tex.offset.x = 1.0 / this.gridSize.x * this.cursor.x;
     tex.offset.y = 1.0 / this.gridSize.y * (this.gridSize.y - this.cursor.y - 1);
+    mesh.rotation.set(Math.random() * this.config.rotX, Math.random() * this.config.rotY, Math.random() * this.config.rotZ);
     this.cursor.x = this.cursor.x + 1;
     if (this.cursor.x >= this.gridSize.x) {
       this.cursor.x = 0;

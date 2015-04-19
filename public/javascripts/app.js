@@ -65,8 +65,7 @@ App = (function() {
       camera: this.camera,
       notes: this.notes,
       gui: this.gui,
-      imageUrl: 'images/elephant.jpg',
-      gridSize: new THREE.Vector2(30, 30)
+      imageUrl: 'images/elephant.jpg'
     });
     return scene;
   };

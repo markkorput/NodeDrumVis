@@ -39,7 +39,7 @@ class App
     scene = new THREE.Scene()
     @singleLine = new SingleLine(scene: scene, camera: @camera, notes: @notes, gui: @gui)
     @randomShapes = new RandomShapes(scene: scene, camera: @camera, notes: @notes, gui: @gui)
-    @tiler = new Tiler(scene: scene, camera: @camera, notes: @notes, gui: @gui, imageUrl: 'images/elephant.jpg', gridSize: new THREE.Vector2(30, 30))
+    @tiler = new Tiler(scene: scene, camera: @camera, notes: @notes, gui: @gui, imageUrl: 'images/elephant.jpg') #, gridSize: new THREE.Vector2(30, 30))
     return scene
 
   _resize: ->

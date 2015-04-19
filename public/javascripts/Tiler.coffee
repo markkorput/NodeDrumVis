@@ -6,10 +6,6 @@ class @Tiler
     @scene = _opts.scene
     @_notes = _opts.notes
     @colors = _.map Please.make_color(colors_returned: 20), (clr) -> new THREE.Color(clr)
-    @materials = _.map @colors, (clr) -> 
-      material = new THREE.MeshBasicMaterial() # new THREE.LineBasicMaterial()
-      material.color = clr
-      material
     @kinds = []
     @gridSize = _opts.gridSize
     @setImageUrl(_opts.imageUrl) if _opts.imageUrl
@@ -21,6 +17,10 @@ class @Tiler
       colorize: false
       offset: 0.0
       scale: 0.0
+      opacity: 1.0
+      rotX: 0.0
+      rotY: 0.0
+      rotZ: 0.0
 
     # gui controls
     if @options.gui
@@ -59,8 +59,13 @@ class @Tiler
 
     tex = @_imageTexture.clone()
     tex.needsUpdate = true # not set by clone, but very much necessary to load the actual image
-    material = new THREE.MeshBasicMaterial(map: tex) # @materials[@kindToIndex(kind)]
+    material = new THREE.MeshBasicMaterial(map: tex)
     material.color = @colors[@kindToIndex(kind)] if @config.colorize
+
+    # opacity
+    if @config.opacity != 1.0
+      material.transparent = true
+      material.opacity = @config.opacity
 
     # create and position mesh
     mesh = new THREE.Mesh(@_cellGeometry, material)
@@ -84,6 +89,9 @@ class @Tiler
     tex.repeat.y = 1.0 / @gridSize.y
     tex.offset.x = 1.0 / @gridSize.x * @cursor.x
     tex.offset.y = 1.0 / @gridSize.y * (@gridSize.y-@cursor.y-1)
+
+    # rotate
+    mesh.rotation.set(Math.random()*@config.rotX, Math.random()*@config.rotY, Math.random()*@config.rotZ)
 
     # increase cursor
     @cursor.x = @cursor.x + 1
