@@ -8,26 +8,39 @@ App = (function() {
   }
 
   App.prototype.init = function() {
+    var _this = this;
     this.notes = new Backbone.Collection();
     this.initVfx();
     this.initGui();
     this.scene = this.createScene();
     this.clock = new THREE.Clock();
     this.controls = new THREE.TrackballControls(this.camera, this.renderer.domElement);
-    return $(window).on('keydown', this._keyDown).mousemove(this._mouseMove);
+    $(window).on('keydown', this._keyDown).mousemove(this._mouseMove);
+    return this.notes.on('add', function(note) {
+      var i, _i, _ref, _results;
+      if (_this.notesConfig.maxNotes === 0 || _this.notes.length <= _this.notesConfig.maxNotes) {
+        return;
+      }
+      _results = [];
+      for (i = _i = _ref = _this.notes.length - _this.notesConfig.maxNotes - 1; _ref <= 0 ? _i <= 0 : _i >= 0; i = _ref <= 0 ? ++_i : --_i) {
+        console.log('removing: ', i);
+        _results.push(_this.notes.remove(_this.notes.at(i)));
+      }
+      return _results;
+    });
   };
 
   App.prototype.update = function() {
     var dt;
     dt = this.clock.getDelta();
     TWEEN.update();
-    if (this.gui_values.trackballControls) {
+    if (this.config.trackballControls) {
       this.controls.update(dt);
     }
     this.singleLine.update(dt);
     this.randomShapes.update(dt);
     this.tiler.update(dt);
-    if (this.gui_values.paused) {
+    if (this.config.paused) {
 
     }
   };
@@ -75,40 +88,51 @@ App = (function() {
   };
 
   App.prototype._keyDown = function(e) {
-    if (this.gui_values.logKeys) {
+    if (this.config.logKeys) {
       console.log('keycode: ' + e.keyCode, e);
     }
-    if (this.gui_values.keysToNotes) {
+    if (this.config.keysToNotes) {
       this.notes.add({
         note: e.keyCode
       });
     }
     if (e.keyCode === 32) {
-      return this.gui_values.paused = !this.gui_values.paused;
+      return this.config.paused = !this.config.paused;
     }
   };
 
   App.prototype.initGui = function() {
-    var folder, item,
+    var folder,
       _this = this;
     this.gui = new dat.GUI();
-    this.gui_values = new function() {
-      this.trackballControls = false;
-      this.logKeys = false;
-      this.keysToNotes = true;
-      return this.running = true;
+    this.config = {
+      running: true,
+      trackballControls: false,
+      logKeys: false,
+      keysToNotes: true
     };
-    this.gui.remember(this.gui_values);
-    folder = this.gui.addFolder('Params');
-    item = folder.add(this.gui_values, 'running');
-    item = folder.add(this.gui_values, 'trackballControls');
-    item = folder.add(this.gui_values, 'logKeys');
-    item = folder.add(this.gui_values, 'keysToNotes');
-    return folder.add({
-      Reset: function() {
-        return _this.reset();
-      }
-    }, 'Reset');
+    this.notesConfig = {
+      maxNotes: 0
+    };
+    if (this.gui) {
+      this.gui.remember(this.config);
+      folder = this.gui.addFolder('App');
+      _.each(Object.keys(this.config), function(key) {
+        var item;
+        return item = folder.add(_this.config, key);
+      });
+      folder.add({
+        Reset: function() {
+          return _this.reset();
+        }
+      }, 'Reset');
+      this.gui.remember(this.notesConfig);
+      folder = this.gui.addFolder('Notes');
+      return _.each(Object.keys(this.notesConfig), function(key) {
+        var item;
+        return item = folder.add(_this.notesConfig, key);
+      });
+    }
   };
 
   App.prototype.reset = function() {
@@ -123,7 +147,7 @@ App = (function() {
 jQuery(document).ready(function() {
   window.drawFrame = function() {
     requestAnimationFrame(drawFrame);
-    if (app.gui_values.running) {
+    if (app.config.running) {
       app.update();
       return app.draw();
     }

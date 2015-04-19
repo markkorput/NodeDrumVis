@@ -7,18 +7,25 @@ class App
 
     @clock = new THREE.Clock()
     @controls = new THREE.TrackballControls( @camera, @renderer.domElement )
-        
+    
+    # callbacks
     $(window).on('keydown', @_keyDown).mousemove(@_mouseMove)#.on('resize', @_resize)
+    @notes.on 'add', (note) =>
+      return if @notesConfig.maxNotes == 0 || @notes.length <= @notesConfig.maxNotes
+      for i in [(@notes.length - @notesConfig.maxNotes - 1)..0]
+        console.log 'removing: ', i
+        @notes.remove @notes.at(i) 
+
 
   update: ->
     dt = @clock.getDelta()
     TWEEN.update()
-    if @gui_values.trackballControls
+    if @config.trackballControls
       @controls.update( dt );
     @singleLine.update(dt)
     @randomShapes.update(dt)
     @tiler.update(dt)
-    return if @gui_values.paused
+    return if @config.paused
 
   draw: ->
     @renderer.render(@scene, @camera)
@@ -46,14 +53,14 @@ class App
     console.log 'TODO; _resize'
 
   _keyDown: (e) =>
-    if @gui_values.logKeys
+    if @config.logKeys
       console.log 'keycode: ' + e.keyCode, e
 
-    if(@gui_values.keysToNotes)
+    if(@config.keysToNotes)
       @notes.add(note: e.keyCode)
 
     if(e.keyCode == 32) # space
-      @gui_values.paused = (!@gui_values.paused)      
+      @config.paused = (!@config.paused)      
 
     # if(e.keyCode == 188) # ',' / '<'
     #   @target_system.prevTarget()
@@ -69,22 +76,28 @@ class App
   initGui: ->
     @gui = new dat.GUI() # ({autoPlace:true});
 
-    @gui_values = new ->
-      @trackballControls = false
-      @logKeys = false
-      @keysToNotes = true
-      @running = true
+    @config =
+      running: true
+      trackballControls: false
+      logKeys: false
+      keysToNotes: true
 
-    @gui.remember(@gui_values)
-    folder = @gui.addFolder 'Params'
-    # folder.open()
-    item = folder.add(@gui_values, 'running')
-    item = folder.add(@gui_values, 'trackballControls')
-    item = folder.add(@gui_values, 'logKeys')
-    item = folder.add(@gui_values, 'keysToNotes')
-    folder.add({Reset: => @reset()}, 'Reset')
-    # item.onChange (val) => @visualizer.set(ghost: val)
-    
+    @notesConfig =
+      maxNotes: 0
+
+    if @gui
+      @gui.remember(@config)
+      folder = @gui.addFolder 'App'
+      # folder.open()
+      _.each Object.keys(@config), (key) =>
+        item = folder.add(@config, key)
+      folder.add({Reset: => @reset()}, 'Reset')
+
+      @gui.remember(@notesConfig)
+      folder = @gui.addFolder 'Notes'
+      _.each Object.keys(@notesConfig), (key) =>
+        item = folder.add(@notesConfig, key)
+
   reset: ->
     @notes.reset()
     @camera.position.set(0,0,0)
@@ -93,7 +106,7 @@ class App
 jQuery(document).ready ->
   window.drawFrame = ->
     requestAnimationFrame(drawFrame)
-    if app.gui_values.running
+    if app.config.running
       app.update()
       app.draw()
 

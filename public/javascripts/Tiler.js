@@ -21,6 +21,7 @@ this.Tiler = (function() {
     this.config = {
       enabled: true,
       showOriginal: true,
+      spacing: 0.0,
       colorize: false,
       offset: 0.0,
       scale: 0.0,
@@ -87,7 +88,7 @@ this.Tiler = (function() {
       material.opacity = this.config.opacity;
     }
     mesh = new THREE.Mesh(this._cellGeometry, material);
-    mesh.position.set(this._cellOrigin.x + this.cursor.x * this.cellSize.x, this._cellOrigin.y - this.cursor.y * this.cellSize.y, this._cellOrigin.z + this.cursor.z);
+    mesh.position.set(this._cellOrigin.x + this.cursor.x * this.cellSize.x + this.config.spacing * (this.cursor.x - this.gridSize.x / 2), this._cellOrigin.y - this.cursor.y * this.cellSize.y - this.config.spacing * (this.cursor.y - this.gridSize.y / 2), this._cellOrigin.z + this.cursor.z);
     if (this.config.offset > 0.0) {
       offsetter = new THREE.Vector3(this.config.offset, 0, 0);
       offsetter.applyAxisAngle(new THREE.Vector3(0, 0, 1), Math.random() * Math.PI * 2);
