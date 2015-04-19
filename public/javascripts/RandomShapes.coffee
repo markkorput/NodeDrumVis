@@ -39,11 +39,11 @@ class @RandomShapes
       note.set({randomShapeMesh: mesh})
 
     @notes.on 'remove', (note) =>
-      @log 'removing note...'
+      # @log 'removing note...'
       @scene.remove(note.get('randomShapeMesh'))
 
     @notes.on 'reset', (collection, options) =>
-      @log 'resetting...'
+      # @log 'resetting...'
       _.each options.previousModels, (note) =>
         @scene.remove note.get('randomShapeMesh')
         note.unset('randomeShapeMesh')

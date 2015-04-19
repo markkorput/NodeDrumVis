@@ -29,11 +29,11 @@ class @SingleLine
       note.set({singleLineMesh: mesh})
 
     @notes.on 'remove', (note) =>
-      @log 'removing note...'
+      # @log 'removing note...'
       @scene.remove(note.get('singleLineMesh'))
 
     @notes.on 'reset', (collection, options) =>
-      @log 'resetting...'
+      # @log 'resetting...'
       _.each options.previousModels, (note) =>
         @scene.remove note.get('singleLineMesh')
         note.unset('singleLineMesh')

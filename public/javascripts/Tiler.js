@@ -46,11 +46,9 @@ this.Tiler = (function() {
       });
     });
     this._notes.on('remove', function(note) {
-      _this.log('removing note...');
       return _this.scene.remove(note.get('tilerMesh'));
     });
     this._notes.on('reset', function(collection, options) {
-      _this.log('resetting...');
       _.each(options.previousModels, function(note) {
         _this.scene.remove(note.get('tilerMesh'));
         return note.unset('tilerMesh');

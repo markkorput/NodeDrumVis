@@ -37,11 +37,11 @@ class @Tiler
       note.set({tilerMesh: mesh})
 
     @_notes.on 'remove', (note) =>
-      @log 'removing note...'
+      # @log 'removing note...'
       @scene.remove(note.get('tilerMesh'))
 
     @_notes.on 'reset', (collection, options) =>
-      @log 'resetting...'
+      # @log 'resetting...'
       _.each options.previousModels, (note) =>
         @scene.remove note.get('tilerMesh')
         note.unset('tilerMesh')

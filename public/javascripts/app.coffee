@@ -13,7 +13,6 @@ class App
     @notes.on 'add', (note) =>
       return if @notesConfig.maxNotes == 0 || @notes.length <= @notesConfig.maxNotes
       for i in [(@notes.length - @notesConfig.maxNotes - 1)..0]
-        console.log 'removing: ', i
         @notes.remove @notes.at(i) 
 
 

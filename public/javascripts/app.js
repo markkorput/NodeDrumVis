@@ -23,7 +23,6 @@ App = (function() {
       }
       _results = [];
       for (i = _i = _ref = _this.notes.length - _this.notesConfig.maxNotes - 1; _ref <= 0 ? _i <= 0 : _i >= 0; i = _ref <= 0 ? ++_i : --_i) {
-        console.log('removing: ', i);
         _results.push(_this.notes.remove(_this.notes.at(i)));
       }
       return _results;
