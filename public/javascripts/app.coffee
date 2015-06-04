@@ -24,6 +24,7 @@ class App
     @singleLine.update(dt)
     @randomShapes.update(dt)
     @tiler.update(dt)
+    @rolls.update(dt)
     return if @config.paused
 
   draw: ->
@@ -46,6 +47,7 @@ class App
     @singleLine = new SingleLine(scene: scene, camera: @camera, notes: @notes, gui: @gui)
     @randomShapes = new RandomShapes(scene: scene, camera: @camera, notes: @notes, gui: @gui)
     @tiler = new Tiler(scene: scene, camera: @camera, notes: @notes, gui: @gui, imageUrl: 'images/elephant.jpg') #, gridSize: new THREE.Vector2(30, 30))
+    @rolls = new Rolls(scene: scene, camera: @camera, notes: @notes, gui: @gui)
     return scene
 
   _resize: ->

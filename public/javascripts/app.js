@@ -39,6 +39,7 @@ App = (function() {
     this.singleLine.update(dt);
     this.randomShapes.update(dt);
     this.tiler.update(dt);
+    this.rolls.update(dt);
     if (this.config.paused) {
 
     }
@@ -78,6 +79,12 @@ App = (function() {
       notes: this.notes,
       gui: this.gui,
       imageUrl: 'images/elephant.jpg'
+    });
+    this.rolls = new Rolls({
+      scene: scene,
+      camera: this.camera,
+      notes: this.notes,
+      gui: this.gui
     });
     return scene;
   };
