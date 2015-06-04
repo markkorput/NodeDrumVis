@@ -1,11 +1,14 @@
 class App
   init: ->
+    @clock = new THREE.Clock()
     @notes = new Backbone.Collection()
+    @analyser = new Analyser(notes: @notes, clock: @clock)
+
     @initVfx()
     @initGui()
     @scene = @createScene()
 
-    @clock = new THREE.Clock()
+    
     @controls = new THREE.TrackballControls( @camera, @renderer.domElement )
     
     # callbacks
@@ -15,9 +18,11 @@ class App
       for i in [(@notes.length - @notesConfig.maxNotes - 1)..0]
         @notes.remove @notes.at(i) 
 
+    @clock.start()
 
   update: ->
     dt = @clock.getDelta()
+    @analyser.update(dt)
     TWEEN.update()
     if @config.trackballControls
       @controls.update( dt );
@@ -47,7 +52,7 @@ class App
     @singleLine = new SingleLine(scene: scene, camera: @camera, notes: @notes, gui: @gui)
     @randomShapes = new RandomShapes(scene: scene, camera: @camera, notes: @notes, gui: @gui)
     @tiler = new Tiler(scene: scene, camera: @camera, notes: @notes, gui: @gui, imageUrl: 'images/elephant.jpg') #, gridSize: new THREE.Vector2(30, 30))
-    @rolls = new Rolls(scene: scene, camera: @camera, notes: @notes, gui: @gui)
+    @rolls = new Rolls(scene: scene, camera: @camera, notes: @notes, gui: @gui, analyser: @analyser)
     return scene
 
   _resize: ->
@@ -58,7 +63,7 @@ class App
       console.log 'keycode: ' + e.keyCode, e
 
     if(@config.keysToNotes)
-      @notes.add(note: e.keyCode)
+      @notes.add(note: e.keyCode, time: @clock.getElapsedTime())
 
     if(e.keyCode == 32) # space
       @config.paused = (!@config.paused)      

@@ -1,6 +1,9 @@
 span#help{position: absolute; right:5px; bottom:5px; color: white; opacity: 0.2; text-align:right;}
 span#help:hover{opacity: 1.0;}
 
+.RollsStats{position: fixed; left: 0; top: 0; opacity: 0.5; color: white;}
+.RollsStats span{display: block;}
+
 /*@import url(https://fonts.googleapis.com/css?family=Arvo:400,700,400italic);*/
 
 /* MeyerWeb Reset */

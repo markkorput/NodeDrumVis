@@ -1,3 +1,23 @@
+StatsView = Backbone.View.extend
+  tagName: 'div'
+  className: 'RollsStats'
+
+  initialize: (opts) ->
+    @analyser = opts.analyser
+
+    @listenTo @collection, 'change', @render
+
+    Object.observe @analyser.values, (changes) =>
+      if changes[0].name == 'time'
+        @render()
+
+  render: ->
+    @$el.html ''
+    @$el.append '<span>Time: '+@analyser.values.time+'</span>' if @analyser
+    @$el.append '<span>Number of hits: '+@collection.length+'</span>'
+    @$el.append '<span>Last BPM: '+@analyser.values.lastNoteBpm+'</span>' if @analyser
+    @$el.append '<span>Current BPM: '+@analyser.values.currentBpm+'</span>' if @analyser
+
 class @Rolls
   constructor: (_opts) ->
     @options = _opts
@@ -5,17 +25,19 @@ class @Rolls
     @scene = _opts.scene
     @_notes = _opts.notes
     @colors = _.map Please.make_color(colors_returned: 2), (clr) -> new THREE.Color(clr)
+    @statsView = new StatsView(collection: @_notes, analyser: _opts.analyser)
+    $('body').append(@statsView.el)
 
     # configurables
     @config =
       enabled: true
       startX: -60
-      startY: 25
+      startY: 30
       startZ: -50
       maxX: 20
-      speed: 10
+      speed: 20
       stepY: -1.5
-      minY: -20
+      minY: -30
       cursor: true
 
     # gui controls

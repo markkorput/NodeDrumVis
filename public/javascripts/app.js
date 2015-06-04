@@ -9,14 +9,18 @@ App = (function() {
 
   App.prototype.init = function() {
     var _this = this;
+    this.clock = new THREE.Clock();
     this.notes = new Backbone.Collection();
+    this.analyser = new Analyser({
+      notes: this.notes,
+      clock: this.clock
+    });
     this.initVfx();
     this.initGui();
     this.scene = this.createScene();
-    this.clock = new THREE.Clock();
     this.controls = new THREE.TrackballControls(this.camera, this.renderer.domElement);
     $(window).on('keydown', this._keyDown).mousemove(this._mouseMove);
-    return this.notes.on('add', function(note) {
+    this.notes.on('add', function(note) {
       var i, _i, _ref, _results;
       if (_this.notesConfig.maxNotes === 0 || _this.notes.length <= _this.notesConfig.maxNotes) {
         return;
@@ -27,11 +31,13 @@ App = (function() {
       }
       return _results;
     });
+    return this.clock.start();
   };
 
   App.prototype.update = function() {
     var dt;
     dt = this.clock.getDelta();
+    this.analyser.update(dt);
     TWEEN.update();
     if (this.config.trackballControls) {
       this.controls.update(dt);
@@ -84,7 +90,8 @@ App = (function() {
       scene: scene,
       camera: this.camera,
       notes: this.notes,
-      gui: this.gui
+      gui: this.gui,
+      analyser: this.analyser
     });
     return scene;
   };
@@ -99,7 +106,8 @@ App = (function() {
     }
     if (this.config.keysToNotes) {
       this.notes.add({
-        note: e.keyCode
+        note: e.keyCode,
+        time: this.clock.getElapsedTime()
       });
     }
     if (e.keyCode === 32) {
