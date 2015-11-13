@@ -4,7 +4,6 @@
     function Tiler(_opts) {
       var folder,
         _this = this;
-      this.log('constructor: ', _opts);
       this.options = _opts;
       this.camera = _opts.camera;
       this.scene = _opts.scene;
@@ -152,7 +151,6 @@
     Tiler.prototype.setImageUrl = function(_url) {
       var onError, onProgress, onSuccess,
         _this = this;
-      this.log('setImageUrl: ', _url);
       this._imageUrl = _url;
       this.loader || (this.loader = new THREE.TextureLoader());
       onSuccess = function(tex) {
@@ -168,7 +166,6 @@
     };
 
     Tiler.prototype.setImage = function(_tex) {
-      this.log('setImage: ', _tex);
       this._imageTexture = _tex;
       this._imageMaterial = new THREE.MeshBasicMaterial({
         map: this._imageTexture

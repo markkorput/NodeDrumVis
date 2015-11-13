@@ -3,6 +3,7 @@ class App
     @clock = new THREE.Clock()
     @notes = new Backbone.Collection()
     @analyser = new Analyser(notes: @notes, clock: @clock)
+    @midi_interface = new MidiInterface()
 
     @initVfx()
     @initGui()

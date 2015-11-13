@@ -14,14 +14,14 @@ input.getPortName(0);
 for(var i=0; i<cnt; i++)
   console.log('Port '+i+' name: '+ input.getPortName(i));
 
-// Configure a callback.
-input.on('message', function(deltaTime, message) {
-  console.log('m:' + message + ' d:' + deltaTime);
-});
+// // Configure a callback.
+// input.on('message', function(deltaTime, message) {
+//   console.log('m:' + message + ' d:' + deltaTime);
+// });
 
-console.log('Monitoring Port ' + (cnt-1));
+// console.log('Monitoring Port ' + (cnt-1));
 // Open the first available input port.
-input.openPort(cnt-1);
+// input.openPort(cnt-1);
 
 // Sysex, timing, and active sensing messages are ignored
 // by default. To enable these message types, pass false for
@@ -37,4 +37,25 @@ input.ignoreTypes(false, true, true);
 // Close the port when done.
 // input.closePort();
 
-module.exports = input;
+function midiMonitor(opts){
+	if(opts.socket){
+		opts.socket.on('GET /midi_ports', function(data){
+
+			data = []
+
+			// Count the available input ports.
+			var cnt = input.getPortCount();
+			for(var i=0; i<cnt; i++)
+				data.push({id: i, name: input.getPortName(i), index: i})
+
+			console.log('Responding to "GET /midi_ports" with', data);
+			opts.socket.emit('midi_ports', data)
+		});
+
+		opts.socket.on('POST /midi_port', function(data){
+			console.log('received POST /midi_port with', data);
+		});
+	}
+}
+
+module.exports = midiMonitor;
