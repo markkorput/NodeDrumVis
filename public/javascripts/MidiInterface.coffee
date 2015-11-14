@@ -32,20 +32,40 @@ MidiInterfaceView = Backbone.View.extend
 class @MidiInterface
   constructor: (_opts) ->
     @options = _opts
+
+    # setup midi ports collection
     @midi_ports ||= new Backbone.Collection()
+
+    # this callback automatically send an enable/disable request to the server
+    # when any of the midi ports' 'open' property change
+    @midi_ports.on 'change:open', (model, value, obj) =>
+      if !@socket
+        @log "No socket initialized, can't request open/close midi port"
+        return
+
+      if value == true
+        @socket.emit('POST /midi_port', {id: model.id, forward: true})
+
+      if value == false && model.previous('open') == true
+        @socket.emit('POST /midi_port', {id: model.id, forward: false})
+
     @init()
 
+    # UI view with midi port select input
     @midi_interface_view = new MidiInterfaceView(collection: @midi_ports)
     $('body').append(@midi_interface_view.el)
     @midi_interface_view.on 'port_selected', @changePort, this
 
   changePort: (port_id) ->
     # @log('TODO: change port to:', @midi_ports.get(port_id).get('name'))
-    if !@socket
-      @log("No socket initialized, can't open Midi port")
-      return
 
-    @socket.emit('POST /midi_port', {id: port_id, forward: true})
+    # make sure all ports are closed (ie. close any open ports)
+    @midi_ports.each (midi_port) ->
+      midi_port.set(open: false)
+
+    # open the specified port
+    if midi_port = @midi_ports.get(port_id)
+      midi_port.set(open: true)
 
   init: ->
     if typeof(io) == 'undefined'

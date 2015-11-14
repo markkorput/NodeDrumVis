@@ -36,8 +36,27 @@
 
   this.MidiInterface = (function() {
     function MidiInterface(_opts) {
+      var _this = this;
       this.options = _opts;
       this.midi_ports || (this.midi_ports = new Backbone.Collection());
+      this.midi_ports.on('change:open', function(model, value, obj) {
+        if (!_this.socket) {
+          _this.log("No socket initialized, can't request open/close midi port");
+          return;
+        }
+        if (value === true) {
+          _this.socket.emit('POST /midi_port', {
+            id: model.id,
+            forward: true
+          });
+        }
+        if (value === false && model.previous('open') === true) {
+          return _this.socket.emit('POST /midi_port', {
+            id: model.id,
+            forward: false
+          });
+        }
+      });
       this.init();
       this.midi_interface_view = new MidiInterfaceView({
         collection: this.midi_ports
@@ -47,14 +66,17 @@
     }
 
     MidiInterface.prototype.changePort = function(port_id) {
-      if (!this.socket) {
-        this.log("No socket initialized, can't open Midi port");
-        return;
-      }
-      return this.socket.emit('POST /midi_port', {
-        id: port_id,
-        forward: true
+      var midi_port;
+      this.midi_ports.each(function(midi_port) {
+        return midi_port.set({
+          open: false
+        });
       });
+      if (midi_port = this.midi_ports.get(port_id)) {
+        return midi_port.set({
+          open: true
+        });
+      }
     };
 
     MidiInterface.prototype.init = function() {
