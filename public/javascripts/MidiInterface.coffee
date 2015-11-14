@@ -89,6 +89,8 @@ class @MidiInterface
       	# @log 'Received midi_ports with: ', data
       	@midi_ports.reset(data)
 
+      @socket.on 'midi-msg', (data) =>
+        @log 'midi-msg:', data
       	
       # @log 'Requesting available midi ports'
       @socket.emit('GET /midi_ports')

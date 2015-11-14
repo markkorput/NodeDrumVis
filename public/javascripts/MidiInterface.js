@@ -95,6 +95,9 @@
           _this.socket.on('midi_ports', function(data) {
             return _this.midi_ports.reset(data);
           });
+          _this.socket.on('midi-msg', function(data) {
+            return _this.log('midi-msg:', data);
+          });
           return _this.socket.emit('GET /midi_ports');
         });
       }
