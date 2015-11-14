@@ -1,6 +1,6 @@
 class @Tiler
   constructor: (_opts) ->
-    @log 'constructor: ', _opts
+    # @log 'constructor: ', _opts
     @options = _opts
     @camera = _opts.camera
     @scene = _opts.scene
@@ -133,7 +133,7 @@ class @Tiler
     console.log('Tiler', msg, arguments[1], arguments[2], arguments[3])
 
   setImageUrl: (_url) ->
-    @log 'setImageUrl: ', _url
+    # @log 'setImageUrl: ', _url
     @_imageUrl = _url
     @loader ||= new THREE.TextureLoader();
     # @loader = new THREE.ImageLoader();
@@ -147,7 +147,7 @@ class @Tiler
     @loader.load @_imageUrl, onSuccess, onProgress, onError
 
   setImage: (_tex) ->
-    @log 'setImage: ', _tex
+    # @log 'setImage: ', _tex
     @_imageTexture = _tex
     @_imageMaterial = new THREE.MeshBasicMaterial(map: @_imageTexture)
     @_imageGeometry = new THREE.PlaneGeometry(@_imageTexture.image.width / @_imageTexture.image.height,1)

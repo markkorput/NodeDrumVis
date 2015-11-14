@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-var debug = require('debug')('myoexpress');
+var debug = require('debug')('NodeDrumVis');
 var app = require('../app');
 
 app.set('port', process.env.PORT || 3000);
@@ -16,6 +16,8 @@ io.on('connection', function (socket) {
   socket.on('resp', function (data) {
     console.log(data);
   });
+
+  var midiMonitor = require('./midiMonitor')({socket: socket});
 });
 
-var midiMonitor = require('./midiMonitor');
+
